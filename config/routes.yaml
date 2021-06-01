@@ -1,0 +1,24 @@
+main:
+    path: /
+    controller: App\Controller\Application::index
+
+login:
+    path: /login
+    controller: App\Controller\Application::index
+
+login_check:
+    path: /login_check
+
+logout:
+    path: /logout
+    
+appConfig:
+    path: /config
+    controller: App\Controller\Application::config
+    methods: GET   
+
+test:
+    path: /test
+    controller: App\Controller\Application::test
+    methods: GET   
+    

@@ -1,0 +1,20 @@
+{
+    "login": {
+        "_": "Логин",
+        "password": "Пароль",
+        "errors": {
+            "login_message": "Логин",
+            "password_message":  "Введите пароль",
+            "password_blank": "Введите пароль",
+            "user_name_blank": "Введите логин"
+        }
+    },
+    "security": {
+        "error": {
+            "403": "Access denied"
+        }
+    },
+    "common": {
+        "loading": "Загрузка..."
+    }
+}
