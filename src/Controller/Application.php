@@ -10,6 +10,9 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Mobile_Detect;
 
+use App\Services\MailAPI;
+use App\Services\MyScladAPI;
+
 class Application extends AbstractController
 {
     /**
@@ -37,8 +40,32 @@ class Application extends AbstractController
         ]);
     }
 
-    public function test()
+    /**
+     * @Route("{reactRouting}", name="default", defaults={"reactRouting": null})
+     */
+
+    public function test(MyScladAPI $myScladAPI, MailAPI $mailAPI)
     {
+        $res = $mailAPI->query([
+            'url' => 'https://otpravka-api.pochta.ru/1.0/clean/address',
+            'method' => 'POST',
+            'data' => [
+                [
+                    'id' => 'adr 1',
+                    'original-address' => 'L1M 2M6, Canada, Whitby, 62 Kenilworth Cres'
+                ],
+                [
+                    'id' => 'adr 2',
+                    'original-address' => 'ул. Мясницкая, д. 26, г. Москва, 1'
+                ]
+            ]
+        ]);
+        dump(json_decode($res, true));
+        return new JsonResponse([
+            'success' => true
+        ]);
+
+
         $ch = curl_init('https://otpravka-api.pochta.ru/1.0/clean/address');
         //$ch = curl_init('https://online.moysklad.ru/api/remap/1.2/security/token');
         //$ch = curl_init('https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/6e6f0433-c8b6-11e8-9109-f8fc00219b08'));
