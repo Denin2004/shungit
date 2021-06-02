@@ -31,30 +31,7 @@ class App extends Component {
         super(props);
     }
 
-    componentDidMount() {
-        console.log('!!!!');
-       /* axios({url: 'https://online.moysklad.ru/api/remap/1.2/security/token', 
-            method: 'post',
-            headers: {
-                        //'Access-Control-Allow-Origin': '*',
-                //'Content-Type': 'application/json',
-                'Authorization': 'Basic Ym90QHNodW5naXQxOtCR0L7RgtGI0YPQvdCz0LjRgg=='
-            },
-            auth: {
-                username: 'bot@shungit1',
-                password: 'Ботшунгит'                
-            },
-            crossDomain: true
-        }).then(res => {
-            console.log(res);
-        }).catch(error => {
-            console.log(error);
-        });*/
-
-    }
-
     render() {
-        console.log('web');
         return (
             <ConfigProvider locale={ruRU}> 
                 <Switch>

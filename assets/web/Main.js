@@ -1,13 +1,16 @@
 import React, {Component} from 'react';
-import { withTranslation } from 'react-i18next';
+import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 
-import { message, Button } from 'antd';
+import { Spin, message } from 'antd';
 
 import axios from 'axios';
+
+import Demands from '@app/web/Demands';
 
 class Main extends Component {
     constructor(props){
         super(props);
+        this.state = {loading: true};
     }
 
     componentDidMount() {
@@ -45,32 +48,16 @@ class Main extends Component {
         });
     }
     
-    test() {
-        console.log(window.mfwApp);
-        axios.get(
-            window.mfwApp.urls.test,
-            {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }
-        ).then(res => {
-            if (res.data.success) {
-            } else {
-                message.error(this.props.t(res.data.error));
-            }
-        }).catch(error => {
-            message.error(error.toString());
-        });
-    }
-    
     render() {
-        return (
+        return this.state.loading === true ? (<Spin/>) : (
         <React.Fragment>
-            <Button onClick={this.test} >Test</Button>
+            <Switch>
+                <Route path="/" component={Demands} />
+                <Route path="/demands" component={Demands} />
+            </Switch>
         </React.Fragment>
         )
     }
 }
 
-export default withTranslation()(Main);
+export default withRouter(Main);

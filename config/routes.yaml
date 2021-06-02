@@ -1,7 +1,3 @@
-main:
-    path: /
-    controller: App\Controller\Application::index
-
 login:
     path: /login
     controller: App\Controller\Application::index
@@ -17,8 +13,15 @@ appConfig:
     controller: App\Controller\Application::config
     methods: GET   
 
-test:
-    path: /test
-    controller: App\Controller\Application::test
-    methods: GET   
-    
+demandsList:
+    path: /demandslist
+    controller: App\Controller\Demands::list
+    methods: GET    
+
+demands:
+    path: /demands
+    controller: App\Controller\Application::index
+
+main:
+    path: /
+    controller: App\Controller\Application::index

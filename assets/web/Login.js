@@ -30,6 +30,7 @@ class Login extends Component {
                 message.error(this.props.t(res.data.error));
             }
         }).catch(error => {
+            console.log(error);
             message.error(error.toString());
         });
     };    

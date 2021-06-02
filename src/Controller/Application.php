@@ -3,10 +3,8 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
 
 use Mobile_Detect;
 
@@ -15,9 +13,6 @@ use App\Services\MyScladAPI;
 
 class Application extends AbstractController
 {
-    /**
-     * @Route("{reactRouting}", name="default", defaults={"reactRouting": null})
-     */
     public function index()
     {
         $detect = new Mobile_Detect;
@@ -25,11 +20,6 @@ class Application extends AbstractController
             return $this->render('base_mobile.html.twig');
         }
         return $this->render('base_web.html.twig');
-    }
-
-    public function error403(Request $request)
-    {
-        return new Response('saaaaa');
     }
 
     public function config()
@@ -40,13 +30,9 @@ class Application extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("{reactRouting}", name="default", defaults={"reactRouting": null})
-     */
-
     public function test(MyScladAPI $myScladAPI, MailAPI $mailAPI)
     {
-        $res = $mailAPI->query([
+/*        $res = $mailAPI->query([
             'url' => 'https://otpravka-api.pochta.ru/1.0/clean/address',
             'method' => 'POST',
             'data' => [
@@ -60,7 +46,13 @@ class Application extends AbstractController
                 ]
             ]
         ]);
-        dump(json_decode($res, true));
+        dump(json_decode($res, true));*/
+
+        $res = $myScladAPI->query([
+            'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10',
+            'method' => 'GET'
+        ]);
+        dump($res);
         return new JsonResponse([
             'success' => true
         ]);
