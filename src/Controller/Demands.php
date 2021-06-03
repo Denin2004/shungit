@@ -91,9 +91,51 @@ class Demands extends AbstractController
         ]);
     }
 
-    public function createPochtaOrder(Request $request)
+    public function createPochtaOrder(Request $request, MyScladAPI $myScladAPI)
     {
-        dump($request->getContent());
+        $data = json_decode($request->getContent(), true);
+        dump($data);
+        $demand = json_decode(
+            $myScladAPI->query([
+                'url' => $data['demandURL'],
+                'method' => 'GET'
+            ]),
+            true
+        );
+        $positions = json_decode(
+            $myScladAPI->query([
+                'url' => $demand['positions']['meta']['href'],
+                'method' => 'GET'
+            ]),
+            true
+        );
+
+        foreach ($positions['rows'] as $position) {
+            $pos = json_decode(
+                $myScladAPI->query([
+                    'url' => $position['meta']['href'],
+                    'method' => 'GET'
+                ]),
+                true
+            );
+            //dump($pos);
+            $assortment = json_decode(
+                $myScladAPI->query([
+                    'url' => $pos['assortment']['meta']['href'],
+                    'method' => 'GET'
+                ]),
+                true
+            );// name - goods description
+            dump($assortment);
+            $productFolder = json_decode(
+                $myScladAPI->query([
+                    'url' => $assortment['productFolder']['meta']['href'],
+                    'method' => 'GET'
+                ]),
+                true
+            ); // tnvedcode //name - description
+            dump($group);
+        }
         $order = [
             [
                 'address-from' => [

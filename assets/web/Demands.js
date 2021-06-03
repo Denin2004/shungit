@@ -99,10 +99,10 @@ class Demands extends Component {
             }
         }).then(res => {
             if (res.data.success) {
-                this.setState({
+/*                this.setState({
                     loading: false,
                     data: res.data.demands
-                });
+                });*/
             } else {
                 message.error(this.props.t(res.data.error));
                 this.setState({loading: false})
