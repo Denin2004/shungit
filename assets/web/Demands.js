@@ -12,16 +12,28 @@ class Demands extends Component {
             loading: true,
             columns: [
                 {
-                    title: this.props.t('common.name'),
-                    dataIndex: 'name'
+                    title: this.props.t('demand.num'),
+                    dataIndex: 'num'
+                },
+                {
+                    title: this.props.t('demand.agent'),
+                    dataIndex: 'agent'
+                },
+                {
+                    title: this.props.t('demand.recipient'),
+                    dataIndex: 'recipient'
                 },
                 {
                     title: this.props.t('common.address'),
-                    dataIndex: 'address',
+                    dataIndex: 'address'
                 },
                 {
-                    title: this.props.t('actions._'),
-                    dataIndex: 'actions'
+                    title: this.props.t('common.sum'),
+                    dataIndex: 'sum',
+                    align: 'right',
+                    render: (text) => {
+                        return text.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                    }
                 }
             ],
             data: []
@@ -40,7 +52,7 @@ class Demands extends Component {
             if (res.data.success) {
                 this.setState({
                     loading: false,
-                    data: res.data.data
+                    data: res.data.demands
                 });
             } else {
                 message.error(this.props.t(res.data.error));

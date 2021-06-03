@@ -9,12 +9,19 @@
             "user_name_blank": "Введите логин"
         }
     },
+    "demand": {
+        "num": "Номер",
+        "agent": "Контрагент",
+        "recipient": "Получатель"
+    },
     "security": {
         "error": {
             "403": "Access denied"
         }
     },
     "common": {
-        "loading": "Загрузка..."
+        "loading": "Загрузка...",
+        "sum": "Сумма",
+        "address": "Адрес"
     }
 }
