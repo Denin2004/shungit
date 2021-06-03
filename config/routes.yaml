@@ -21,6 +21,12 @@ demandsList:
 demands:
     path: /demands
     controller: App\Controller\Application::index
+    methods: GET
+    
+demandCreatePochtaOrder:
+    path: /demands/createpochtaorder
+    controller: App\Controller\Demands::createPochtaOrder
+    methods: POST    
 
 main:
     path: /

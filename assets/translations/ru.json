@@ -22,6 +22,8 @@
     "common": {
         "loading": "Загрузка...",
         "sum": "Сумма",
-        "address": "Адрес"
+        "address": "Адрес",
+        "currency": "Валюта",
+        "actions": "Действия"
     }
 }
