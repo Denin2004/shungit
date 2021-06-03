@@ -57,14 +57,13 @@ class Demands extends Component {
     }
 
     componentDidMount() {
-        axios.get(
-            window.mfwApp.urls.demand.list,
-            {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+        axios({
+            url: window.mfwApp.urls.demand.list,
+            method: 'get',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
             }
-        ).then(res => {
+        }).then(res => {
             if (res.data.success) {
                 this.setState({
                     loading: false,
@@ -90,16 +89,15 @@ class Demands extends Component {
     }
     
     createPochtaOrder(row) {
-        console.log(row);
-        axios.post(
-            window.mfwApp.urls.demand.createPochtaOrder,
-            {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                data: row
+        axios({
+            url: window.mfwApp.urls.demand.createPochtaOrder,
+            data: row,
+            method: 'post',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
             }
-        ).then(res => {
+        }).then(res => {
             if (res.data.success) {
                 this.setState({
                     loading: false,

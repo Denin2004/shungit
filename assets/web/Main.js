@@ -14,14 +14,13 @@ class Main extends Component {
     }
 
     componentDidMount() {
-        axios.get(
-            '/config',
-            {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+        axios({
+            url: '/config',
+            method: 'get',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
             }
-        ).then(res => {
+        }).then(res => {
             if (res.data.success) {
                 window.mfwApp.urls = JSON.parse(res.data.urls);
                 this.setState({

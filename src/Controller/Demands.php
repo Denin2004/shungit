@@ -93,7 +93,7 @@ class Demands extends AbstractController
 
     public function createPochtaOrder(Request $request)
     {
-        dump($request);
+        dump($request->getContent());
         $order = [
             [
                 'address-from' => [
@@ -239,7 +239,7 @@ class Demands extends AbstractController
         dump($order);
         return new JsonResponse([
             'success' => true,
-            'demands' => $res
+            //'demands' => $res
         ]);
     }
 }
