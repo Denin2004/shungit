@@ -104,7 +104,13 @@ class Demands extends Component {
                     data: res.data.demands
                 });*/
             } else {
-                message.error(this.props.t(res.data.error));
+                var error = this.props.t(res.data.error);
+                if (res.data.args != undefined) {
+                    Object.keys(res.data.args).forEach(function(key){
+                        error = error.replace('{'+key+'}', res.data.args[key]);
+                    });
+                }
+                message.error(error);
                 this.setState({loading: false})
             }            
         }).catch(error => {
