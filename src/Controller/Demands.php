@@ -30,7 +30,6 @@ class Demands extends AbstractController
                 ]),
                 true
             );
-            dump($order);
             $agent = json_decode(
                 $myScladAPI->query([
                     'url' => $demand['agent']['meta']['href'],
@@ -89,7 +88,8 @@ class Demands extends AbstractController
                 'agentURL' => $demand['agent']['meta']['href'],
                 'countryURL' => $countryURL,
                 'city' => $city,
-                'index' => $index
+                'index' => $index,
+                'order-num' => $order['name']
             ];
         }
         return new JsonResponse([
@@ -98,12 +98,12 @@ class Demands extends AbstractController
         ]);
     }
 
-    public function createPochtaOrder(Request $request, MyScladAPI $myScladAPI)
+    public function createPochtaOrder(Request $request, MyScladAPI $myScladAPI, MailAPI $mailAPI)
     {
         $order = [
             [
                 'address-from' => [
-                    'address-type' => 'DEFAULT',
+/*                    'address-type' => 'DEFAULT',
                     'area' => 'string',
                     'building' => 'string',
                     'corpus' => 'string',
@@ -119,17 +119,17 @@ class Demands extends AbstractController
                     'room' => 'string',
                     'slash' => 'string',
                     'street' => 'string',
-                    'vladenie' => 'string'
+                    'vladenie' => 'string'*/
                 ],
                 'address-type-to' => 'DEFAULT',
-                'area-to' => 'string',
+                //'area-to' => 'string',
                 //'branch-name' => 'string',
                 //'brand-name' => 'string',
-                'building-to' => 'string',
+                //'building-to' => 'string',
                 //'comment' => 'string',
                 'completeness-checking' => true,
                 'compulsory-payment' => 0,
-                'corpus-to' => 'string',
+                //'corpus-to' => 'string',
                 'courier' => false,
                 'customs-declaration' => [
                     //'certificate-number' => 'string',
@@ -199,13 +199,13 @@ class Demands extends AbstractController
                         ]*/
                     ]
                 ],
-                'hotel-to' => 'string',
-                'house-to' => 'string',
-                'index-to' => 0,
+                //'hotel-to' => 'string',
+                //'house-to' => 'string',
+                //'index-to' => 0,
                 'insr-value' => 0,
                 'inventory' => true,
-                'letter-to' => 'string',
-                'location-to' => 'string',
+                //'letter-to' => 'string',
+                //'location-to' => 'string',
                 'mail-category' => 'SIMPLE',
                 'mail-direct' => 0,
                 'mail-type' => 'UNDEFINED',
@@ -213,12 +213,12 @@ class Demands extends AbstractController
                 //'middle-name' => 'string',
                 'no-return' => false,
                 //'notice-payment-method' => 'CASHLESS',
-                'num-address-type-to' => 'string',
-                'office-to' => 'string',
+                //'num-address-type-to' => 'string',
+                //'office-to' => 'string',
                 'order-num' => 'string',
                 'payment' => 0,
                 //'payment-method' => 'CASHLESS',
-                'place-to' => 'string',
+                //'place-to' => 'string',
                 'postoffice-code' => 'string',
                 'pre-post-preparation' => false,
                 'prepaid-amount' => 0,
@@ -229,9 +229,9 @@ class Demands extends AbstractController
                 'sender-name' => 'string',
                 //'slash-to' => 'string',
                 //'sms-notice-recipient' => 0,
-                'str-index-to' => 'string',
-                'street-to' => 'string',
-                'surname' => 'string',
+                //'str-index-to' => 'string',
+                //'street-to' => 'string',
+                //'surname' => 'string',
                 'tel-address' => 0,
                 'tel-address-from' => 0,
                 //'time-slot-id' => 0,
@@ -254,6 +254,7 @@ class Demands extends AbstractController
         $order[0]['raw-address'] = $data['address'];
         $order[0]['recipient-name'] = $data['recipient'];
         $order[0]['str-index-to'] = $data['index'];
+        $order[0]['order-num'] = $data['order-num'];
         
         $demand = json_decode(
             $myScladAPI->query([
@@ -296,6 +297,52 @@ class Demands extends AbstractController
             ]),
             true
         );
+        $addressFrom = json_decode($mailAPI->query([
+            'url' => 'https://otpravka-api.pochta.ru/1.0/clean/address',
+            'method' => 'POST',
+            'data' => [
+                [
+                    'id' => 'addressFrom',
+                    'original-address' => $organization['actualAddress']
+                ],
+                [
+                    'id' => 'addressTo',
+                    'original-address' => $data['address']
+                ]
+            ]
+        ]), true);
+        foreach ($addressFrom as $address) {
+            if ($address['id'] == 'addressFrom') {
+                if ($address['validation-code'] != 'VALIDATED') {
+                    return new JsonResponse([
+                        'success' => false,
+                        'error' => 'demand.errors.invalid_address_from',
+                        'args' => [
+                            'address' => $organization['name'].' '.$organization['actualAddress']
+                        ]
+                    ]);
+                }
+                foreach ($address as $key => $value) {
+                    if (!in_array($key, ['id', 'original-address', 'validation-code']) && !str_contains($key, '-guid')) {
+                        $order[0]['address-from'][$key] = $value;
+                    }
+                }
+            }
+            if ($address['id'] == 'addressTo') {
+                if ($address['validation-code'] != 'VALIDATED') {
+                    $order[0]['place-to'] = $data['city'];
+                    $order[0]['postoffice-code'] = $data['index'];
+                    $order[0]['raw-address'] = $data['address'];
+                }
+                foreach ($address as $key => $value) {
+                    if (!in_array($key, ['id', 'original-address', 'validation-code']) && !str_contains($key, '-guid')) {
+                        $order[0][$key.'-to'] = $value;
+                    }
+                }
+            }
+        }
+
+
         $order[0]['sender-name'] = $organization['name'];
         $order[0]['tel-address-from'] = isset($organization['phone']) ? str_replace(['+', '-', ' ', ')', '('], '', $organization['phone']): 0;
 
