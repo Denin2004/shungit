@@ -171,7 +171,7 @@ class Demands extends AbstractController
                     //'customer-email' => 'string',
                     //'customer-inn' => 'string',
                     //'customer-name' => 'string',
-                    'customer-phone' => 0,
+                    //'customer-phone' => 0,
                     'payment-amount' => 0
                 ],
                 'fragile' => true,
@@ -219,7 +219,7 @@ class Demands extends AbstractController
                 'payment' => 0,
                 //'payment-method' => 'CASHLESS',
                 //'place-to' => 'string',
-                'postoffice-code' => 'string',
+                //'postoffice-code' => 'string',
                 'pre-post-preparation' => false,
                 'prepaid-amount' => 0,
                 'raw-address' => 'string',
@@ -232,7 +232,7 @@ class Demands extends AbstractController
                 //'str-index-to' => 'string',
                 //'street-to' => 'string',
                 //'surname' => 'string',
-                'tel-address' => 0,
+                //'tel-address' => 0,
                 'tel-address-from' => 0,
                 //'time-slot-id' => 0,
                 //'transport-mode' => 'SUPEREXPRESS',
@@ -249,11 +249,11 @@ class Demands extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $order[0]['given-name'] = $data['recipient'];
-        $order[0]['place-to'] = $data['city'];
-        $order[0]['postoffice-code'] = $data['index'];
+        //$order[0]['place-to'] = $data['city'];
+        //$order[0]['postoffice-code'] = $data['index'];
         $order[0]['raw-address'] = $data['address'];
         $order[0]['recipient-name'] = $data['recipient'];
-        $order[0]['str-index-to'] = $data['index'];
+        //$order[0]['str-index-to'] = $data['index'];
         $order[0]['order-num'] = $data['order-num'];
         
         $demand = json_decode(
@@ -329,9 +329,10 @@ class Demands extends AbstractController
                 }
             }
             if ($address['id'] == 'addressTo') {
+                dump($address);
                 if ($address['validation-code'] != 'VALIDATED') {
-                    $order[0]['place-to'] = $data['city'];
-                    $order[0]['postoffice-code'] = $data['index'];
+                    //$order[0]['place-to'] = $data['city'];
+                    //$order[0]['postoffice-code'] = $data['index'];
                     $order[0]['raw-address'] = $data['address'];
                 }
                 foreach ($address as $key => $value) {
@@ -356,9 +357,10 @@ class Demands extends AbstractController
         if (isset($agent['email'])) {
             $order[0]['fiscal-data']['customer-email'] = $agent['email'];
         }
-        $order[0]['fiscal-data']['customer-phone'] = isset($agent['phone']) ? str_replace(['+', '-', ' ', ')', '('], '', $agent['phone']): 0;
-        $order[0]['tel-address'] = $order[0]['fiscal-data']['customer-phone'];
-
+        if (isset($agent['phone'])) {
+            $order[0]['fiscal-data']['customer-phone'] = str_replace(['+', '-', ' ', ')', '('], '', $agent['phone']);
+            $order[0]['tel-address'] = $order[0]['fiscal-data']['customer-phone'];
+        }
         $country = json_decode(
             $myScladAPI->query([
                 'url' => $data['countryURL'],
@@ -425,7 +427,7 @@ class Demands extends AbstractController
                     'description' => $productFolder['description'],
                     'tnved-code' => $productFolder['code'],
                     'trademark' => 'NO TM',
-                    'value' => $pos['price']*0.2/100,
+                    'value' => intval(round($pos['price']*0.2, 0)),
                     'weight' => $assortment['weight']*$pos['quantity']*1000
                 ];
                 $order[0]['goods']['items'][] = [
@@ -435,7 +437,7 @@ class Demands extends AbstractController
                     'description' => $productFolder['description'],
                     'excise' => 0,
                     'goods-type' => 'GOODS',
-                    'insr-value' => 0,
+                    'insr-value' => intval(round($pos['price']*0.2*$pos['quantity'])),
                     //'item-number' => 'string',
                     'lineattr' => 0,
                     'payattr' => 0,
@@ -443,13 +445,14 @@ class Demands extends AbstractController
                     //'supplier-inn' => 'string',
                     //'supplier-name' => 'string',
                     //'supplier-phone' => 'string',
-                    'value' => $pos['price']*0.2/100,
+                    'value' => intval(round($pos['price']*0.2, 0)),
                     'vat-rate' => 0,
                     'weight' => $assortment['weight']*$pos['quantity']*1000
                 ];
                 $goods[] = $assortment['productFolder']['meta']['href'];
                 $order[0]['fiscal-data']['payment-amount'] += $pos['price']*0.2/100*$pos['quantity'];
                 $order[0]['prepaid-amount'] += $pos['price']*0.2/100*$pos['quantity'];
+                $order[0]['insr-value'] += intval(round($pos['price']*0.2*$pos['quantity']));
             } else {
                 $order[0]['fiscal-data']['payment-amount'] -= $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
                 $order[0]['prepaid-amount'] -= $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
@@ -466,6 +469,14 @@ class Demands extends AbstractController
             }
         }
         dump($order);
+/*        $res = json_decode($mailAPI->query([
+            'url' => 'https://otpravka-api.pochta.ru/1.0/user/backlog',
+            'method' => 'PUT',
+            'data' => $order
+        ]), true);
+        dump($res);*/
+
+
         return new JsonResponse([
             'success' => true,
             //'demands' => $res
