@@ -134,6 +134,7 @@ class Demands extends AbstractController
                 'customs-declaration' => [
                     //'certificate-number' => 'string',
                     'currency' => 'USD',
+                    //'customs-code' => 'string',
                     'customs-entries' => [
                         /*[
                             'amount' => 0,
