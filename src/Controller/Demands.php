@@ -11,16 +11,16 @@ use App\Services\MyScladAPI;
 
 class Demands extends AbstractController
 {
-    public function list(MyScladAPI $myScladAPI)
+    public function list(MyScladAPI $myScladAPI, $offset)
     {
         $demands = json_decode(
             $myScladAPI->query([
-                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/6e6f0433-c8b6-11e8-9109-f8fc00219b08'),
-                //'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10',
+                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/6e6f0433-c8b6-11e8-9109-f8fc00219b08'),
                 'method' => 'GET'
             ]),
             true
         );
+        dump($demands);
         $res = [];
         foreach ($demands['rows'] as $demand) {
             $order = json_decode(
@@ -94,7 +94,8 @@ class Demands extends AbstractController
         }
         return new JsonResponse([
             'success' => true,
-            'demands' => $res
+            'demands' => $res,
+            'nextOffset' => $offset+10
         ]);
     }
 
@@ -251,12 +252,12 @@ class Demands extends AbstractController
 
         $order[0]['given-name'] = $data['recipient'];
         //$order[0]['place-to'] = $data['city'];
-        //$order[0]['postoffice-code'] = $data['index'];
+        $order[0]['postoffice-code'] = '190961'; //!!!!!!! debug
         $order[0]['raw-address'] = $data['address'];
         $order[0]['recipient-name'] = $data['recipient'];
         //$order[0]['str-index-to'] = $data['index'];
         $order[0]['order-num'] = $data['order-num'];
-        
+
         $demand = json_decode(
             $myScladAPI->query([
                 'url' => $data['demandURL'],
@@ -298,7 +299,16 @@ class Demands extends AbstractController
             ]),
             true
         );
-        $addressFrom = json_decode($mailAPI->query([
+        $country = json_decode(
+            $myScladAPI->query([
+                'url' => $data['countryURL'],
+                'method' => 'GET'
+            ]),
+            true
+        );
+        $order[0]['mail-direct'] = $country['code'];
+
+        $addresses = json_decode($mailAPI->query([
             'url' => 'https://otpravka-api.pochta.ru/1.0/clean/address',
             'method' => 'POST',
             'data' => [
@@ -312,7 +322,7 @@ class Demands extends AbstractController
                 ]
             ]
         ]), true);
-        foreach ($addressFrom as $address) {
+        foreach ($addresses as $address) {
             if ($address['id'] == 'addressFrom') {
                 if ($address['validation-code'] != 'VALIDATED') {
                     return new JsonResponse([
@@ -330,11 +340,11 @@ class Demands extends AbstractController
                 }
             }
             if ($address['id'] == 'addressTo') {
-                dump($address);
                 if ($address['validation-code'] != 'VALIDATED') {
-                    //$order[0]['place-to'] = $data['city'];
-                    //$order[0]['postoffice-code'] = $data['index'];
+                    $order[0]['place-to'] = $country['description'];
+                    $order[0]['index-to'] = $data['index'];
                     $order[0]['raw-address'] = $data['address'];
+                    $order[0]['street-to'] = $data['address'];
                 }
                 foreach ($address as $key => $value) {
                     if (!in_array($key, ['id', 'original-address', 'validation-code']) && !str_contains($key, '-guid')) {
@@ -362,14 +372,6 @@ class Demands extends AbstractController
             $order[0]['fiscal-data']['customer-phone'] = str_replace(['+', '-', ' ', ')', '('], '', $agent['phone']);
             $order[0]['tel-address'] = $order[0]['fiscal-data']['customer-phone'];
         }
-        $country = json_decode(
-            $myScladAPI->query([
-                'url' => $data['countryURL'],
-                'method' => 'GET'
-            ]),
-            true
-        );
-        $order[0]['mail-direct'] = $country['code'];
 
         $positions = json_decode(
             $myScladAPI->query([
@@ -469,18 +471,17 @@ class Demands extends AbstractController
                 $order[0]['goods']['items'][$productIndex]['value'] = $order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
             }
         }
-        dump($order);
-/*        $res = json_decode($mailAPI->query([
+        //dump($order);
+        $res = json_decode($mailAPI->query([
             'url' => 'https://otpravka-api.pochta.ru/1.0/user/backlog',
             'method' => 'PUT',
             'data' => $order
         ]), true);
-        dump($res);*/
-
+        //dump($res);
 
         return new JsonResponse([
             'success' => true,
-            //'demands' => $res
+            'mailResult' => $res
         ]);
     }
 }

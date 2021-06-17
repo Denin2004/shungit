@@ -14,9 +14,13 @@ appConfig:
     methods: GET   
 
 demandsList:
-    path: /demandslist
+    path: /demandslist/{offset}
     controller: App\Controller\Demands::list
-    methods: GET    
+    methods: GET
+    defaults: 
+        offset: 0
+    requirements:
+        offset: \d+
 
 demands:
     path: /demands

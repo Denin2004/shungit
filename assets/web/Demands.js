@@ -3,14 +3,34 @@ import { withTranslation } from 'react-i18next';
 
 import axios from 'axios';
 
-import { Table, message, Button } from 'antd';
+import { Table, message, Button, Modal, Row, Col } from 'antd';
 
 class Demands extends Component {
     constructor(props){
         super(props);
         this.createPochtaOrder = this.createPochtaOrder.bind(this);
+        this.closeErrors = this.closeErrors.bind(this);
+        this.getDemands = this.getDemands.bind(this);
+        this.nextDemands = this.nextDemands.bind(this);
         this.state = {
             loading: true,
+            errors: [],
+            showErrors: false,
+            offset: 0,
+            errorColumns: [
+                {
+                    title: this.props.t('demand.errors.columns.code'),
+                    dataIndex: 'code'
+                },
+                {
+                    title: this.props.t('demand.errors.columns.description'),
+                    dataIndex: 'description'
+                },
+                {
+                    title: this.props.t('demand.errors.columns.details'),
+                    dataIndex: 'details'
+                }
+            ],            
             columns: [
                 {
                     title: this.props.t('demand.num'),
@@ -47,7 +67,7 @@ class Demands extends Component {
                         return <Button
                                   type="link"
                                   onClick={() => this.createPochtaOrder(row)}
-                                  className="mfw-table-button-link">{this.props.t('actions.cancel')}
+                                  className="mfw-table-button-link">{this.props.t('demand.russianMail')}
                                 </Button>;
                     }
                 }
@@ -57,8 +77,12 @@ class Demands extends Component {
     }
 
     componentDidMount() {
+        this.getDemands();
+    }
+    
+    getDemands() {
         axios({
-            url: window.mfwApp.urls.demand.list,
+            url: window.mfwApp.urls.demand.list+'\\'+this.state.offset,
             method: 'get',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -67,7 +91,8 @@ class Demands extends Component {
             if (res.data.success) {
                 this.setState({
                     loading: false,
-                    data: res.data.demands
+                    data: res.data.demands,
+                    offset: res.data.nextOffset
                 });
             } else {
                 message.error(this.props.t(res.data.error));
@@ -99,6 +124,11 @@ class Demands extends Component {
             }
         }).then(res => {
             if (res.data.success) {
+                if (res.data.mailResult.errors != undefined) {
+                    this.setState({errors: res.data.mailResult.errors[0]['error-codes'], showErrors: true});
+                } else {
+                    alert('УСПЕШНО!!!!!');
+                }
 /*                this.setState({
                     loading: false,
                     data: res.data.demands
@@ -128,6 +158,15 @@ class Demands extends Component {
         });
     }
     
+    nextDemands() {
+        this.setState(state => {return {offset: state.offset+10, loading: true}});
+        this.getDemands();
+    }
+    
+    closeErrors() {
+        this.setState({showErrors: false});
+    }
+    
     render() {
         return (
         <React.Fragment>
@@ -136,7 +175,29 @@ class Demands extends Component {
                 rowKey={record => record.num}
                 dataSource={this.state.data}
                 loading={this.state.loading}
+                pagination={false}
             />
+            { this.state.loading ? null :
+            <Row justify="end">
+                <Button className="mfw-mt-1 mfw-mr-1" onClick={this.nextDemands}>{this.props.t('common.next.10')}</Button>
+            </Row>
+            }
+            <Modal 
+               title={this.props.t('common.errors')} 
+               visible={this.state.showErrors} 
+               onCancel={this.closeErrors}
+               width="50vw"
+               footer1={null}
+               footer1={[
+                <Button key="back" onClick={this.closeErrors}>{this.props.t('common.close')}</Button>
+              ]}>
+                <Table columns={this.state.errorColumns}
+                    rowKey={record => record.code}
+                    dataSource={this.state.errors}
+                    size="small"
+                    pagination={false}
+                    scroll={{y: 240}}/>
+            </Modal>                    
         </React.Fragment>
         )
     }

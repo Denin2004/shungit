@@ -17,8 +17,14 @@
             "no_pack_code": "'{pack}' не указан код",
             "no_product_description": "'{product}' нет описания группы",
             "no_product_code": "'{product}' нет кода ЕНВД",
-            "invalid_address_from": "{address} неправильный адрес отправителя"
-        }
+            "invalid_address_from": "{address} неправильный адрес отправителя",
+            "columns": {
+                "code": "Код",
+                "description": "Описание",
+                "details": "Детали"
+            }
+        },
+        "russianMail": "Почта России"
     },
     "security": {
         "error": {
@@ -30,6 +36,11 @@
         "sum": "Сумма",
         "address": "Адрес",
         "currency": "Валюта",
-        "actions": "Действия"
+        "actions": "Действия",
+        "close": "Закрыть",
+        "errors": "Ошибки",
+        "next": {
+            "10": "Следующие 10"
+        }
     }
 }
