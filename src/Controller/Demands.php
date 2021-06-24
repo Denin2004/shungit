@@ -20,7 +20,6 @@ class Demands extends AbstractController
             ]),
             true
         );
-        dump($demands);
         $res = [];
         foreach ($demands['rows'] as $demand) {
             $order = json_decode(
@@ -128,10 +127,10 @@ class Demands extends AbstractController
                 //'brand-name' => 'string',
                 //'building-to' => 'string',
                 //'comment' => 'string',
-                'completeness-checking' => true,
-                'compulsory-payment' => 0,
+                //'completeness-checking' => true,
+                //'compulsory-payment' => 0,
                 //'corpus-to' => 'string',
-                'courier' => false,
+                //'courier' => false,
                 'customs-declaration' => [
                     //'certificate-number' => 'string',
                     'currency' => 'USD',
@@ -150,18 +149,18 @@ class Demands extends AbstractController
                     'entries-type' => 'GIFT',
                     //'invoice-number' => 'string',
                     //'license-number' => 'string',
-                    'with-certificate' => false,
-                    'with-invoice' => false,
-                    'with-license' => false
+                    //'with-certificate' => false,
+                    //'with-invoice' => false,
+                    //'with-license' => false
                 ],
-                'delivery-with-cod' => false,
-                'dimension' => [
+                //'delivery-with-cod' => false,
+                /*'dimension' => [
                     'height' => 0,
                     'length' => 0,
                     'width' => 0
-                ],
+                ],*/
                 //'dimension-type' => 'S',
-                'easy-return' => false,
+                //'easy-return' => false,
                 /*'ecom-data' => [
                     'delivery-point-index' => 'string',
                     'services' => [
@@ -169,14 +168,14 @@ class Demands extends AbstractController
                     ]
                 ],*/
                 //'envelope-type' => 'C', ????? https://otpravka.pochta.ru/specification#/enums-base-envelope-type
-                'fiscal-data' => [
+                /*'fiscal-data' => [
                     //'customer-email' => 'string',
                     //'customer-inn' => 'string',
                     //'customer-name' => 'string',
                     //'customer-phone' => 0,
-                    'payment-amount' => 0
-                ],
-                'fragile' => true,
+                    //'payment-amount' => 0
+                ],*/
+                //'fragile' => true,
                 'given-name' => 'string',
                 'goods' => [
                     'items' => [
@@ -205,30 +204,30 @@ class Demands extends AbstractController
                 //'house-to' => 'string',
                 //'index-to' => 0,
                 'insr-value' => 0,
-                'inventory' => true,
+                //'inventory' => true,
                 //'letter-to' => 'string',
                 //'location-to' => 'string',
-                'mail-category' => 'SIMPLE',
-                'mail-direct' => 0,
-                'mail-type' => 'UNDEFINED',
+                //'mail-category' => 'SIMPLE',
+                //'mail-direct' => 0,
+                //'mail-type' => 'UNDEFINED',
                 'mass' => 0,
                 //'middle-name' => 'string',
-                'no-return' => false,
+                //'no-return' => false,
                 //'notice-payment-method' => 'CASHLESS',
                 //'num-address-type-to' => 'string',
                 //'office-to' => 'string',
-                'order-num' => 'string',
+                //'order-num' => 'string',
                 'payment' => 0,
                 //'payment-method' => 'CASHLESS',
                 //'place-to' => 'string',
                 //'postoffice-code' => 'string',
-                'pre-post-preparation' => false,
-                'prepaid-amount' => 0,
-                'raw-address' => 'string',
+                //'pre-post-preparation' => false,
+                //'prepaid-amount' => 0,
+                //'raw-address' => 'string',
                 'recipient-name' => 'string',
                // 'region-to' => 'string',
                // 'room-to' => 'string',
-                'sender-name' => 'string',
+                //'sender-name' => 'string',
                 //'slash-to' => 'string',
                 //'sms-notice-recipient' => 0,
                 //'str-index-to' => 'string',
@@ -238,9 +237,10 @@ class Demands extends AbstractController
                 'tel-address-from' => 0,
                 //'time-slot-id' => 0,
                 //'transport-mode' => 'SUPEREXPRESS',
-                'transport-type' => 'AVIA',
+                //'transport-type' => 'AVIA',
                 //'vladenie-to' => 'string',
                 //'vsd' => true,
+                'weight' => 0,
                 //'with-electronic-notice' => true,
                 //'with-order-of-notice' => true,
                 //'with-simple-notice' => true,
@@ -252,8 +252,8 @@ class Demands extends AbstractController
 
         $order[0]['given-name'] = $data['recipient'];
         //$order[0]['place-to'] = $data['city'];
-        $order[0]['postoffice-code'] = '190961'; //!!!!!!! debug
-        $order[0]['raw-address'] = $data['address'];
+        $order[0]['postoffice-code'] = '191122'; //!!!!!!! debug
+        //$order[0]['raw-address'] = $data['address'];
         $order[0]['recipient-name'] = $data['recipient'];
         //$order[0]['str-index-to'] = $data['index'];
         $order[0]['order-num'] = $data['order-num'];
@@ -287,6 +287,7 @@ class Demands extends AbstractController
                     $order[0]['mail-type'] = $pack['code'];
                     break;
                 case '7c75642d-c0d8-11e8-9ff4-34e80029be85': // вес
+                    $order[0]['weight'] = $attribute['value']*1000;
                     $order[0]['mass'] = $attribute['value']*1000;
                     break;
             }
@@ -334,7 +335,7 @@ class Demands extends AbstractController
                     ]);
                 }
                 foreach ($address as $key => $value) {
-                    if (!in_array($key, ['id', 'original-address', 'validation-code']) && !str_contains($key, '-guid')) {
+                    if (!in_array($key, ['id', 'original-address', 'validation-code', 'quality-code']) && !str_contains($key, '-guid')) {
                         $order[0]['address-from'][$key] = $value;
                     }
                 }
@@ -343,11 +344,11 @@ class Demands extends AbstractController
                 if ($address['validation-code'] != 'VALIDATED') {
                     $order[0]['place-to'] = $country['description'];
                     $order[0]['index-to'] = $data['index'];
-                    $order[0]['raw-address'] = $data['address'];
+                    //$order[0]['raw-address'] = $data['address'];
                     $order[0]['street-to'] = $data['address'];
                 }
                 foreach ($address as $key => $value) {
-                    if (!in_array($key, ['id', 'original-address', 'validation-code']) && !str_contains($key, '-guid')) {
+                    if (!in_array($key, ['id', 'original-address', 'validation-code', 'quality-code']) && !str_contains($key, '-guid')) {
                         $order[0][$key.'-to'] = $value;
                     }
                 }
@@ -366,11 +367,11 @@ class Demands extends AbstractController
             true
         );
         if (isset($agent['email'])) {
-            $order[0]['fiscal-data']['customer-email'] = $agent['email'];
+            //$order[0]['fiscal-data']['customer-email'] = $agent['email'];
         }
         if (isset($agent['phone'])) {
-            $order[0]['fiscal-data']['customer-phone'] = str_replace(['+', '-', ' ', ')', '('], '', $agent['phone']);
-            $order[0]['tel-address'] = $order[0]['fiscal-data']['customer-phone'];
+            //$order[0]['fiscal-data']['customer-phone'] = str_replace(['+', '-', ' ', ')', '('], '', $agent['phone']);
+            $order[0]['tel-address'] = str_replace(['+', '-', ' ', ')', '('], '', $agent['phone']);
         }
 
         $positions = json_decode(
@@ -453,32 +454,33 @@ class Demands extends AbstractController
                     'weight' => $assortment['weight']*$pos['quantity']*1000
                 ];
                 $goods[] = $assortment['productFolder']['meta']['href'];
-                $order[0]['fiscal-data']['payment-amount'] += $pos['price']*0.2/100*$pos['quantity'];
-                $order[0]['prepaid-amount'] += $pos['price']*0.2/100*$pos['quantity'];
+                //$order[0]['fiscal-data']['payment-amount'] += $pos['price']*0.2/100*$pos['quantity'];
+                //$order[0]['prepaid-amount'] += $pos['price']*0.2/100*$pos['quantity'];
                 $order[0]['insr-value'] += intval(round($pos['price']*0.2*$pos['quantity']));
             } else {
-                $order[0]['fiscal-data']['payment-amount'] -= $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
-                $order[0]['prepaid-amount'] -= $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
+                //$order[0]['fiscal-data']['payment-amount'] -= $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
+                //$order[0]['prepaid-amount'] -= $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
 
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['value'] =
                     ($order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value']+$pos['price']*0.2/100*$pos['quantity']) /
                     ($order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']+$pos['quantity']);
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount'] += $pos['quantity'];
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['weight'] += $assortment['weight']*$pos['quantity']*1000;
-                $order[0]['fiscal-data']['payment-amount'] += $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
-                $order[0]['prepaid-amount'] += $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
+                //$order[0]['fiscal-data']['payment-amount'] += $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
+                //$order[0]['prepaid-amount'] += $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
                 $order[0]['goods']['items'][$productIndex]['quantity'] = $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount'];
                 $order[0]['goods']['items'][$productIndex]['value'] = $order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
             }
         }
         //dump($order);
+        unset($order[0]['customs-declaration']);
+        unset($order[0]['goods']);
         $res = json_decode($mailAPI->query([
             'url' => 'https://otpravka-api.pochta.ru/1.0/user/backlog',
             'method' => 'PUT',
             'data' => $order
         ]), true);
-        //dump($res);
-
+        dump($res, $order[0]);
         return new JsonResponse([
             'success' => true,
             'mailResult' => $res
