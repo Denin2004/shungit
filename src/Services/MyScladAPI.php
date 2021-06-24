@@ -25,8 +25,8 @@ class MyScladAPI
         );
 
 /* for work */
-        curl_setopt($ch, CURLOPT_PROXY, '192.168.82.249:3128');
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        //curl_setopt($ch, CURLOPT_PROXY, '192.168.82.249:3128');
+        //curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         return curl_exec($ch);
     }
 }

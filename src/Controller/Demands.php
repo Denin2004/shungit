@@ -13,9 +13,26 @@ class Demands extends AbstractController
 {
     public function list(MyScladAPI $myScladAPI, $offset)
     {
-        $demands = json_decode(
+/*        $s = json_decode(
+            $myScladAPI->query([
+                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata?limit=100',
+                'method' => 'GET'
+            ]),
+            true
+        );
+        dump($s);*/
+
+/*        $demands = json_decode( //ожидае отгрузки
             $myScladAPI->query([
                 'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/6e6f0433-c8b6-11e8-9109-f8fc00219b08'),
+                'method' => 'GET'
+            ]),
+            true
+        );*/
+
+        $demands = json_decode(
+            $myScladAPI->query([
+                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/4a029aee-a6bf-11eb-0a80-083a000112cd'),
                 'method' => 'GET'
             ]),
             true
@@ -207,7 +224,7 @@ class Demands extends AbstractController
                 //'inventory' => true,
                 //'letter-to' => 'string',
                 //'location-to' => 'string',
-                //'mail-category' => 'SIMPLE',
+                'mail-category' => 'SIMPLE',
                 //'mail-direct' => 0,
                 //'mail-type' => 'UNDEFINED',
                 'mass' => 0,
@@ -234,7 +251,7 @@ class Demands extends AbstractController
                 //'street-to' => 'string',
                 //'surname' => 'string',
                 //'tel-address' => 0,
-                'tel-address-from' => 0,
+                //'tel-address-from' => 0,
                 //'time-slot-id' => 0,
                 //'transport-mode' => 'SUPEREXPRESS',
                 //'transport-type' => 'AVIA',
@@ -284,7 +301,7 @@ class Demands extends AbstractController
                             ]
                         ]);
                     }
-                    $order[0]['mail-type'] = $pack['code'];
+                    $order[0]['mail-type'] = 'POSTAL_PARCEL';//$pack['code'];
                     break;
                 case '7c75642d-c0d8-11e8-9ff4-34e80029be85': // вес
                     $order[0]['weight'] = $attribute['value']*1000;
@@ -345,7 +362,7 @@ class Demands extends AbstractController
                     $order[0]['place-to'] = $country['description'];
                     $order[0]['index-to'] = $data['index'];
                     //$order[0]['raw-address'] = $data['address'];
-                    $order[0]['street-to'] = $data['address'];
+                    $order[0]['street-to'] = 'Billerica 131 Bridle Road';//$data['address'];
                 }
                 foreach ($address as $key => $value) {
                     if (!in_array($key, ['id', 'original-address', 'validation-code', 'quality-code']) && !str_contains($key, '-guid')) {
@@ -357,7 +374,7 @@ class Demands extends AbstractController
 
 
         $order[0]['sender-name'] = $organization['name'];
-        $order[0]['tel-address-from'] = isset($organization['phone']) ? str_replace(['+', '-', ' ', ')', '('], '', $organization['phone']): 0;
+        //$order[0]['tel-address-from'] = isset($organization['phone']) ? str_replace(['+', '-', ' ', ')', '('], '', $organization['phone']): 0;
 
         $agent = json_decode(
             $myScladAPI->query([
@@ -407,56 +424,58 @@ class Demands extends AbstractController
                     ]),
                     true
                 ); // tnvedcode - code //desription - description
-                if (!isset($productFolder['description'])) {
-                    return new JsonResponse([
-                        'success' => false,
-                        'error' => 'demand.errors.no_product_description',
-                        'args' => [
-                            'product' => $productFolder['name']
-                        ]
-                    ]);
+                if ($productFolder['id'] != '08451167-b85d-11e9-912f-f3d40009f89c') { // не услуги
+                    if (!isset($productFolder['description'])) {
+                        return new JsonResponse([
+                            'success' => false,
+                            'error' => 'demand.errors.no_product_description',
+                            'args' => [
+                                'product' => $productFolder['name']
+                            ]
+                        ]);
+                    }
+                    if (!isset($productFolder['code'])) {
+                        return new JsonResponse([
+                            'success' => false,
+                            'error' => 'demand.errors.no_product_code',
+                            'args' => [
+                                'product' => $productFolder['name']
+                            ]
+                        ]);
+                    }
+                    $order[0]['customs-declaration']['customs-entries'][] = [
+                        'amount' => $pos['quantity'],
+                        'country-code' => 643,
+                        'description' => $productFolder['description'],
+                        'tnved-code' => $productFolder['code'],
+                        'trademark' => 'NO TM',
+                        'value' => intval(round($pos['price']*0.2, 0)),
+                        'weight' => $assortment['weight']*$pos['quantity']*1000
+                    ];
+                    $order[0]['goods']['items'][] = [
+                        'code' => $productFolder['code'],
+                        'country-code' => 643,
+                        //'customs-declaration-number' => 'string',
+                        'description' => $productFolder['description'],
+                        'excise' => 0,
+                        'goods-type' => 'GOODS',
+                        'insr-value' => intval(round($pos['price']*0.2*$pos['quantity'])),
+                        //'item-number' => 'string',
+                        'lineattr' => 0,
+                        'payattr' => 0,
+                        'quantity' => $pos['quantity'],
+                        //'supplier-inn' => 'string',
+                        //'supplier-name' => 'string',
+                        //'supplier-phone' => 'string',
+                        'value' => intval(round($pos['price']*0.2, 0)),
+                        'vat-rate' => 0,
+                        'weight' => $assortment['weight']*$pos['quantity']*1000
+                    ];
+                    $goods[] = $assortment['productFolder']['meta']['href'];
+                    //$order[0]['fiscal-data']['payment-amount'] += $pos['price']*0.2/100*$pos['quantity'];
+                    //$order[0]['prepaid-amount'] += $pos['price']*0.2/100*$pos['quantity'];
+                    $order[0]['insr-value'] += intval(round($pos['price']*0.2*$pos['quantity']));
                 }
-                if (!isset($productFolder['code'])) {
-                    return new JsonResponse([
-                        'success' => false,
-                        'error' => 'demand.errors.no_product_code',
-                        'args' => [
-                            'product' => $productFolder['name']
-                        ]
-                    ]);
-                }
-                $order[0]['customs-declaration']['customs-entries'][] = [
-                    'amount' => $pos['quantity'],
-                    'country-code' => 643,
-                    'description' => $productFolder['description'],
-                    'tnved-code' => $productFolder['code'],
-                    'trademark' => 'NO TM',
-                    'value' => intval(round($pos['price']*0.2, 0)),
-                    'weight' => $assortment['weight']*$pos['quantity']*1000
-                ];
-                $order[0]['goods']['items'][] = [
-                    'code' => $productFolder['code'],
-                    'country-code' => 643,
-                    //'customs-declaration-number' => 'string',
-                    'description' => $productFolder['description'],
-                    'excise' => 0,
-                    'goods-type' => 'GOODS',
-                    'insr-value' => intval(round($pos['price']*0.2*$pos['quantity'])),
-                    //'item-number' => 'string',
-                    'lineattr' => 0,
-                    'payattr' => 0,
-                    'quantity' => $pos['quantity'],
-                    //'supplier-inn' => 'string',
-                    //'supplier-name' => 'string',
-                    //'supplier-phone' => 'string',
-                    'value' => intval(round($pos['price']*0.2, 0)),
-                    'vat-rate' => 0,
-                    'weight' => $assortment['weight']*$pos['quantity']*1000
-                ];
-                $goods[] = $assortment['productFolder']['meta']['href'];
-                //$order[0]['fiscal-data']['payment-amount'] += $pos['price']*0.2/100*$pos['quantity'];
-                //$order[0]['prepaid-amount'] += $pos['price']*0.2/100*$pos['quantity'];
-                $order[0]['insr-value'] += intval(round($pos['price']*0.2*$pos['quantity']));
             } else {
                 //$order[0]['fiscal-data']['payment-amount'] -= $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
                 //$order[0]['prepaid-amount'] -= $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
@@ -473,14 +492,14 @@ class Demands extends AbstractController
             }
         }
         //dump($order);
-        unset($order[0]['customs-declaration']);
+        //unset($order[0]['customs-declaration']);
         unset($order[0]['goods']);
         $res = json_decode($mailAPI->query([
             'url' => 'https://otpravka-api.pochta.ru/1.0/user/backlog',
             'method' => 'PUT',
             'data' => $order
         ]), true);
-        dump($res, $order[0]);
+        dump(/*$res,*/ json_encode($order[0], JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
         return new JsonResponse([
             'success' => true,
             'mailResult' => $res
