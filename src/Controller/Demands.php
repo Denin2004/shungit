@@ -220,11 +220,11 @@ class Demands extends AbstractController
                 //'hotel-to' => 'string',
                 //'house-to' => 'string',
                 //'index-to' => 0,
-                'insr-value' => 0,
+                //'insr-value' => 0,
                 //'inventory' => true,
                 //'letter-to' => 'string',
                 //'location-to' => 'string',
-                'mail-category' => 'SIMPLE',
+                'mail-category' => 'ORDINARY',
                 //'mail-direct' => 0,
                 //'mail-type' => 'UNDEFINED',
                 'mass' => 0,
@@ -474,7 +474,7 @@ class Demands extends AbstractController
                     $goods[] = $assortment['productFolder']['meta']['href'];
                     //$order[0]['fiscal-data']['payment-amount'] += $pos['price']*0.2/100*$pos['quantity'];
                     //$order[0]['prepaid-amount'] += $pos['price']*0.2/100*$pos['quantity'];
-                    $order[0]['insr-value'] += intval(round($pos['price']*0.2*$pos['quantity']));
+                    //$order[0]['insr-value'] += intval(round($pos['price']*0.2*$pos['quantity']));
                 }
             } else {
                 //$order[0]['fiscal-data']['payment-amount'] -= $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value'];
