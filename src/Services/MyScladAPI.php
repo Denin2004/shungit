@@ -23,6 +23,11 @@ class MyScladAPI
                'Content-Type: application/json;charset=UTF-8'
             ]
         );
+        if (isset($query['data'])) {
+            $data_string = json_encode($query['data']);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+        }
+
 
 /* for work */
         curl_setopt($ch, CURLOPT_PROXY, '192.168.82.249:3128');

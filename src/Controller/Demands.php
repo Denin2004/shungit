@@ -155,6 +155,26 @@ class Demands extends AbstractController
             ]),
             true
         );
+        dump($demand);
+
+/*        $res = json_decode(   изменение отгрузки
+            $myScladAPI->query([
+                'url' => $data['demandURL'],
+                'method' => 'PUT',
+                'data' => [
+                    'name' => $demand['name'].'-test'
+                ]
+            ]),
+            true
+        );
+        dump($res);
+        return new JsonResponse([
+            'success' => true,
+            'mailResult' => []
+        ]);*/
+
+
+
         foreach ($demand['attributes'] as $attribute) {
             switch ($attribute['id']) {
                 case '7c75642d-c0d8-11e8-9ff4-34e80029be85': // вес
@@ -293,11 +313,11 @@ class Demands extends AbstractController
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['weight'] += $assortment['weight']*$pos['quantity']*1000;
             }
         }
-        $res = json_decode($mailAPI->query([
+/*        $res = json_decode($mailAPI->query([
             'url' => 'https://otpravka-api.pochta.ru/1.0/user/backlog',
             'method' => 'PUT',
             'data' => $order
-        ]), true);
+        ]), true);*/
         dump($order[0]);
         return new JsonResponse([
             'success' => true,
