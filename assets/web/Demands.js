@@ -134,14 +134,23 @@ class Demands extends Component {
                     data: res.data.demands
                 });*/
             } else {
-                var error = this.props.t(res.data.error);
-                if (res.data.args != undefined) {
-                    Object.keys(res.data.args).forEach(function(key){
-                        error = error.replace('{'+key+'}', res.data.args[key]);
+                if (res.data.errors != undefined) {
+                    const demand = this.props.t('demand._');
+                    res.data.errors.map((error, key) => {
+                        res.data.errors[key]['code'] = demand+' '+error.code;
+                        res.data.errors[key]['description'] = this.props.t(error.description);
                     });
+                    this.setState({errors: res.data.errors, showErrors: true});
+                } else {
+                    var error = this.props.t(res.data.error);
+                    if (res.data.args != undefined) {
+                        Object.keys(res.data.args).forEach(function(key){
+                            error = error.replace('{'+key+'}', res.data.args[key]);
+                        });
+                    }
+                    message.error(error);
                 }
-                message.error(error);
-                this.setState({loading: false})
+                this.setState({loading: false});
             }            
         }).catch(error => {
             if (error.response) {

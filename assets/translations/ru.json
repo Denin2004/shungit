@@ -10,13 +10,14 @@
         }
     },
     "demand": {
+        "_": "Отгрузка",
         "num": "Номер",
         "agent": "Контрагент",
         "recipient": "Получатель",
         "errors": {
-            "no_pack_code": "'{pack}' не указан код",
-            "no_product_description": "'{product}' нет описания группы",
-            "no_product_code": "'{product}' нет кода ЕНВД",
+            "no_pack_code": "Не указан код",
+            "no_product_description": "Нет описания группы",
+            "no_product_code": "Нет кода ЕНВД",
             "invalid_address_from": "{address} неправильный адрес отправителя",
             "columns": {
                 "code": "Код",
