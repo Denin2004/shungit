@@ -298,7 +298,7 @@ class Demands extends AbstractController
             'method' => 'PUT',
             'data' => $order
         ]), true);
-        dump($order[0]);
+        dump($res);
         return new JsonResponse([
             'success' => true,
             'mailResult' => $res
