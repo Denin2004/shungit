@@ -17,18 +17,22 @@ class Demands extends Component {
             errors: [],
             showErrors: false,
             offset: 0,
+            oldOffset: 0,
             errorColumns: [
                 {
                     title: this.props.t('demand.errors.columns.code'),
-                    dataIndex: 'code'
+                    dataIndex: 'code',
+                    className: 'mfw-va-top'
                 },
                 {
                     title: this.props.t('demand.errors.columns.description'),
-                    dataIndex: 'description'
+                    dataIndex: 'description',
+                    className: 'mfw-va-top'
                 },
                 {
                     title: this.props.t('demand.errors.columns.details'),
-                    dataIndex: 'details'
+                    dataIndex: 'details',
+                    className: 'mfw-va-top'
                 }
             ],            
             columns: [
@@ -61,13 +65,20 @@ class Demands extends Component {
                     }
                 },
                 {
+                    title: this.props.t('demand.documents'),
+                    dataIndex: 'pochtaURL',
+                    render: (text) => {
+                        return <a href={text} target="_blank">{text}</a>;
+                    }                    
+                },                
+                {
                     title: this.props.t('common.actions'),
                     dataIndex: 'actions',
                     render: (text, row) => {
                         return <Button
                                   type="link"
                                   onClick={() => this.createPochtaOrder(row)}
-                                  className="mfw-table-button-link">{this.props.t('demand.russianMail')}
+                                  className="mfw-table-button-link">{this.props.t('demand.russianMailOrder')}
                                 </Button>;
                     }
                 }
@@ -89,11 +100,12 @@ class Demands extends Component {
             }
         }).then(res => {
             if (res.data.success) {
-                this.setState({
+                this.setState(state => { return {
                     loading: false,
                     data: res.data.demands,
-                    offset: res.data.nextOffset
-                });
+                    offset: res.data.nextOffset,
+                    oldOffset: state.offset
+                }});
             } else {
                 message.error(this.props.t(res.data.error));
                 this.setState({loading: false})
@@ -127,21 +139,27 @@ class Demands extends Component {
                 if (res.data.mailResult.errors != undefined) {
                     this.setState({errors: res.data.mailResult.errors[0]['error-codes'], showErrors: true});
                 } else {
-                    alert('УСПЕШНО!!!!!');
+                    this.setState(state => {return {loading: true, offset: state.oldOffset}});
+                    this.getDemands();
                 }
-/*                this.setState({
-                    loading: false,
-                    data: res.data.demands
-                });*/
             } else {
-                var error = this.props.t(res.data.error);
-                if (res.data.args != undefined) {
-                    Object.keys(res.data.args).forEach(function(key){
-                        error = error.replace('{'+key+'}', res.data.args[key]);
+                if (res.data.errors != undefined) {
+                    const demand = this.props.t('demand._');
+                    res.data.errors.map((error, key) => {
+                        res.data.errors[key]['code'] = demand+' '+error.code;
+                        res.data.errors[key]['description'] = this.props.t(error.description);
                     });
+                    this.setState({errors: res.data.errors, showErrors: true});
+                } else {
+                    var error = this.props.t(res.data.error);
+                    if (res.data.args != undefined) {
+                        Object.keys(res.data.args).forEach(function(key){
+                            error = error.replace('{'+key+'}', res.data.args[key]);
+                        });
+                    }
+                    message.error(error);
                 }
-                message.error(error);
-                this.setState({loading: false})
+                this.setState({loading: false});
             }            
         }).catch(error => {
             if (error.response) {

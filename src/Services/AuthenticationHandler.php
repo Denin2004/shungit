@@ -56,7 +56,6 @@ class AuthenticationHandler implements AuthenticationSuccessHandlerInterface, Au
      *  @return     Response      */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        dump($exception);
         return new JsonResponse([
             'success' => false,
             'error' => $exception->getMessage()
