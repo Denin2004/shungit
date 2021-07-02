@@ -16,7 +16,7 @@ class Demands extends AbstractController
     {
         $demands = json_decode( //ожидае отгрузки
             $myScladAPI->query([
-                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&order=name&offset='.$offset.
+                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&order=created,desc&offset='.$offset.
                   '&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/715fb121-c8c8-11e8-9107-50480022b339').';'.
                    'store='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/store/50392439-584c-11e8-9ff4-3150000af7ef').';'.
                    urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/attributes/c773c502-6039-11e9-912f-f3d400064b14').'.meta.href='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/customentity/3e0f4472-a6da-11e8-9ff4-3150001277bb/57c5e928-a6f4-11e8-9ff4-315000146031'),
