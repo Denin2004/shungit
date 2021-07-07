@@ -139,7 +139,7 @@ class Demands extends AbstractController
                 'customs-declaration' => [
                     'currency' => 'USD',
                     'customs-entries' => [],
-                    'entries-type' => 'GIFT',
+                    'entries-type' => 'SALE_OF_GOODS',
                 ],
                 'given-name' => 'string',
                 'mail-category' => 'ORDINARY',
@@ -302,12 +302,13 @@ class Demands extends AbstractController
                 }
             } else {
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['value'] =
-                    ($order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value']+$pos['price']*0.2/100*$pos['quantity']) /
+                    ($order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value']+$pos['price']*0.2*$pos['quantity']) /
                     ($order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']+$pos['quantity']);
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount'] += $pos['quantity'];
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['weight'] += $assortment['weight']*$pos['quantity']*1000;
             }
         }
+
         $res = json_decode($mailAPI->query([
             'url' => 'https://otpravka-api.pochta.ru/1.0/user/backlog',
             'method' => 'PUT',
@@ -323,7 +324,7 @@ class Demands extends AbstractController
                 'url' => $data['demandURL'],
                 'method' => 'PUT',
                 'data' => [
-                    'name' => (string)$res['result-ids'][0],
+                    'name' => $pochtaDemand['barcode'],
                     'attributes' => [
                         [
                             'meta' => [
