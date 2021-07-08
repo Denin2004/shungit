@@ -174,6 +174,7 @@ class Demands extends AbstractController
                     break;
             }
         }
+        $order[0]['mail-type'] = $order[0]['mass'] > 2000 ? 'POSTAL_PARCEL' : 'SMALL_PACKET';
 
         $organization = json_decode(
             $myScladAPI->query([
@@ -308,7 +309,6 @@ class Demands extends AbstractController
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['weight'] += $assortment['weight']*$pos['quantity']*1000;
             }
         }
-
         $res = json_decode($mailAPI->query([
             'url' => 'https://otpravka-api.pochta.ru/1.0/user/backlog',
             'method' => 'PUT',
