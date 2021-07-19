@@ -25,7 +25,7 @@ class Demands extends AbstractController
             true
         );
 
-/*        $demands = json_decode(
+        /*$demands = json_decode(
             $myScladAPI->query([
                 'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/4a029aee-a6bf-11eb-0a80-083a000112cd'),
                 'method' => 'GET'
@@ -174,7 +174,11 @@ class Demands extends AbstractController
                     break;
             }
         }
-        $order[0]['mail-type'] = $order[0]['mass'] > 2000 ? 'POSTAL_PARCEL' : 'SMALL_PACKET';
+
+        if ($order[0]['mass'] < 2000) {
+            $order[0]['mail-type'] = 'SMALL_PACKET';
+            $order[0]['mail-category'] =  'ORDERED';
+        }
 
         $organization = json_decode(
             $myScladAPI->query([
