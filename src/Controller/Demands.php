@@ -134,7 +134,7 @@ class Demands extends AbstractController
     {
         $order = [
             [
-                'address-from' => $config->get('post-office'),
+                //'address-from' => $config->get('post-office'),
                 'address-type-to' => 'DEFAULT',
                 'customs-declaration' => [
                     'currency' => 'USD',
@@ -209,7 +209,7 @@ class Demands extends AbstractController
         foreach ($addresses as $address) {
             if ($address['id'] == 'addressTo') {
                 if ($address['validation-code'] != 'VALIDATED') {
-                    $order[0]['index-to'] = $data['index']; // преобразовать в строку
+                    $order[0]['str-index-to'] = $data['index']; // преобразовать в строку
                     $order[0]['street-to'] = $data['street'];
                     $order[0]['place-to'] = $data['city'];
                 } else {
