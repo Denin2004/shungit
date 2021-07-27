@@ -166,16 +166,31 @@ class Demands extends AbstractController
             true
         );
 
+        $dateDemand = '';
         foreach ($demand['attributes'] as $attribute) {
             switch ($attribute['id']) {
                 case '7c75642d-c0d8-11e8-9ff4-34e80029be85': // вес
                     $order[0]['weight'] = $attribute['value']*1000;
                     $order[0]['mass'] = $attribute['value']*1000;
                     break;
+                case 'b46f0979-d8d7-11eb-0a80-0962000d1b54':
+                    $dateDemand = explode(' ', $attribute['value'])[0];
+                    break;
             }
         }
-
-        if ($order[0]['mass'] < 2000) {
+        if ($dateDemand == '') {
+            return new JsonResponse([
+                'success' => false,
+                'errors' => [
+                    [
+                        'code' => $demand['name'],
+                        'description' => 'demand.errors.no_date',
+                        'details' => ''
+                    ]
+                ]
+            ]);
+        }
+        if ($order[0]['mass'] < 1500) {
             $order[0]['mail-type'] = 'SMALL_PACKET';
             $order[0]['mail-category'] =  'ORDERED';
         }
@@ -347,6 +362,17 @@ class Demands extends AbstractController
                     ]
                 ]
             ]);
+            $part = json_decode($mailAPI->query([
+                'url' => 'https://otpravka-api.pochta.ru/1.0/user/shipment',
+                'method' => 'POST',
+                'data' => $res['result-ids']
+            ]), true);
+            if (isset($part['errors'])) {
+                return new JsonResponse([
+                    'success' => false,
+                    'errors' => $part['errors']
+                ]);
+            }
         } else {
             return new JsonResponse([
                 'success' => false,

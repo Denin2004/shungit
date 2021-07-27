@@ -24,7 +24,8 @@
                 "code": "Код",
                 "description": "Описание",
                 "details": "Детали"
-            }
+            },
+            "no_date": "Не указана дата отгрузки"
         },
         "russianMailOrder": "Заказ на почту России",
         "documents": "Документы"
