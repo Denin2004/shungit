@@ -9,12 +9,13 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Services\MailAPI;
 use App\Services\MyScladAPI;
 use App\Services\SiteConfig;
+use App\Entity\Batches;
 
 class Demands extends AbstractController
 {
     public function list(MyScladAPI $myScladAPI, $offset)
     {
-        $demands = json_decode( //ожидае отгрузки
+/*        $demands = json_decode( //ожидае отгрузки
             $myScladAPI->query([
                 'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&order=created,desc&offset='.$offset.
                   '&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/715fb121-c8c8-11e8-9107-50480022b339').';'.
@@ -23,22 +24,15 @@ class Demands extends AbstractController
                 'method' => 'GET'
             ]),
             true
-        );
+        );*/
 
-        /*$demands = json_decode(
+        $demands = json_decode(
             $myScladAPI->query([
                 'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/4a029aee-a6bf-11eb-0a80-083a000112cd'),
                 'method' => 'GET'
             ]),
             true
-        );*/
-/*        $demands = json_decode(
-            $myScladAPI->query([
-                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=name=02647',
-                'method' => 'GET'
-            ]),
-            true
-        );*/
+        );
         $res = [];
         foreach ($demands['rows'] as $demand) {
             $order = json_decode(
@@ -130,7 +124,7 @@ class Demands extends AbstractController
         ]);
     }
 
-    public function createPochtaOrder(Request $request, MyScladAPI $myScladAPI, MailAPI $mailAPI, SiteConfig $config)
+    public function createPochtaOrder(Request $request, MyScladAPI $myScladAPI, MailAPI $mailAPI, SiteConfig $config, Batches $batchesDB)
     {
         $order = [
             [
@@ -362,11 +356,37 @@ class Demands extends AbstractController
                     ]
                 ]
             ]);
-            $part = json_decode($mailAPI->query([
-                'url' => 'https://otpravka-api.pochta.ru/1.0/user/shipment',
-                'method' => 'POST',
-                'data' => $res['result-ids']
-            ]), true);
+            $batches = $batchesDB->byDate($dateDemand);
+            if (count($batches) == 0) {
+                $part = json_decode($mailAPI->query([
+                    'url' => 'https://otpravka-api.pochta.ru/1.0/user/shipment',
+                    'method' => 'POST',
+                    'data' => $res['result-ids']
+                ]), true);
+                if (isset($part['errors'])) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'errors' => $part['errors']
+                    ]);
+                }
+                dump($part);
+                $batchesDB->create([
+                    'date' => $dateDemand,
+                    'batch' => $part['batches'][0]['batch-name']
+                ]);
+            } else {
+                $part = json_decode($mailAPI->query([
+                    'url' => 'https://otpravka-api.pochta.ru/1.0/batch/'.$batches[0]['batch'].'/shipment',
+                    'method' => 'POST',
+                    'data' => $res['result-ids']
+                ]), true);
+                if (isset($part['errors'])) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'errors' => $part['errors']
+                    ]);
+                }
+            }
             if (isset($part['errors'])) {
                 return new JsonResponse([
                     'success' => false,

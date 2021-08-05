@@ -52,4 +52,28 @@ services:
         class: App\Services\MyScladAPI
         arguments: ['%mysclad_credentials%']
         public: true       
-        
+
+    App\Entity\:
+        resource: '../src/Entity'
+        tags: ['controller.service_arguments']
+
+    db_connection:
+        class: Doctrine\DBAL\Connection
+        factory: Doctrine\DBAL\DriverManager::getConnection
+        arguments:
+            $params:
+                driver: 'pdo_pgsql'
+                host:     "%env(resolve:DATABASE_HOST)%"
+                port:     "%env(resolve:DATABASE_PORT)%"
+                dbname:   "%env(resolve:DATABASE_NAME)%"
+                user:     "%env(resolve:DATABASE_USER)%"
+                password: "%env(resolve:DATABASE_PSW)%"
+                charset:  UTF8
+
+    app.dbprovider:
+        class: App\Services\DbProvider
+        arguments: ['@db_connection', '@security.token_storage', '@App\Services\SiteConfig']
+
+    App\Entity\Entity:
+        class: App\Entity\Entity
+        arguments: ['@app.dbprovider']        
