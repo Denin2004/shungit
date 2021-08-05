@@ -15,7 +15,7 @@ class Demands extends AbstractController
 {
     public function list(MyScladAPI $myScladAPI, $offset)
     {
-/*        $demands = json_decode( //ожидае отгрузки
+        $demands = json_decode( //ожидае отгрузки
             $myScladAPI->query([
                 'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&order=created,desc&offset='.$offset.
                   '&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/715fb121-c8c8-11e8-9107-50480022b339').';'.
@@ -24,15 +24,15 @@ class Demands extends AbstractController
                 'method' => 'GET'
             ]),
             true
-        );*/
+        );
 
-        $demands = json_decode(
+/*        $demands = json_decode(
             $myScladAPI->query([
                 'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/4a029aee-a6bf-11eb-0a80-083a000112cd'),
                 'method' => 'GET'
             ]),
             true
-        );
+        );*/
         $res = [];
         foreach ($demands['rows'] as $demand) {
             $order = json_decode(
