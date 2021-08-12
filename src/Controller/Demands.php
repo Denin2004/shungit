@@ -28,6 +28,14 @@ class Demands extends AbstractController
 
 /*        $demands = json_decode(
             $myScladAPI->query([
+                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=name=CL063022356RU',
+                'method' => 'GET'
+            ]),
+            true
+        );*/
+
+/*        $demands = json_decode(
+            $myScladAPI->query([
                 'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/4a029aee-a6bf-11eb-0a80-083a000112cd'),
                 'method' => 'GET'
             ]),
@@ -359,7 +367,7 @@ class Demands extends AbstractController
             $batches = $batchesDB->byDate($dateDemand);
             if (count($batches) == 0) {
                 $part = json_decode($mailAPI->query([
-                    'url' => 'https://otpravka-api.pochta.ru/1.0/user/shipment',
+                    'url' => 'https://otpravka-api.pochta.ru/1.0/user/shipment?sending-date='.$dateDemand,
                     'method' => 'POST',
                     'data' => $res['result-ids']
                 ]), true);
@@ -369,7 +377,6 @@ class Demands extends AbstractController
                         'errors' => $part['errors']
                     ]);
                 }
-                dump($part);
                 $batchesDB->create([
                     'date' => $dateDemand,
                     'batch' => $part['batches'][0]['batch-name']
