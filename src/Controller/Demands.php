@@ -393,6 +393,26 @@ class Demands extends AbstractController
                         'errors' => $part['errors']
                     ]);
                 }
+                if (isset($part['code'])and($part['code'] == 1001)) {
+                    $batchesDB->delete([
+                      'batch' => $batches[0]['batch']
+                    ]);
+                    $part = json_decode($mailAPI->query([
+                        'url' => 'https://otpravka-api.pochta.ru/1.0/user/shipment?sending-date='.$dateDemand,
+                        'method' => 'POST',
+                        'data' => $res['result-ids']
+                    ]), true);
+                    if (isset($part['errors'])) {
+                        return new JsonResponse([
+                            'success' => false,
+                            'errors' => $part['errors']
+                        ]);
+                    }
+                    $batchesDB->create([
+                        'date' => $dateDemand,
+                        'batch' => $part['batches'][0]['batch-name']
+                    ]);
+                }
             }
             if (isset($part['errors'])) {
                 return new JsonResponse([

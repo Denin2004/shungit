@@ -24,4 +24,12 @@ class Batches extends Entity
             $params
         );
     }
+
+    public function delete($params)
+    {
+        return $this->provider->  fetchAll(
+            'delete from public.batches where batch=:batch',
+            $params
+        );
+    }
 }
