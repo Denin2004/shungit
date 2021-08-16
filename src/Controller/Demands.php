@@ -28,7 +28,7 @@ class Demands extends AbstractController
 
 /*        $demands = json_decode(
             $myScladAPI->query([
-                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=name=CL063022356RU',
+                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=name=RR134066817RU',
                 'method' => 'GET'
             ]),
             true
@@ -364,7 +364,10 @@ class Demands extends AbstractController
                     ]
                 ]
             ]);
-            $batches = $batchesDB->byDate($dateDemand);
+            $batches = $batchesDB->find([
+                'dt' => $dateDemand,
+                'mail_type' => $order[0]['mail-type']
+            ]);
             if (count($batches) == 0) {
                 $part = json_decode($mailAPI->query([
                     'url' => 'https://otpravka-api.pochta.ru/1.0/user/shipment?sending-date='.$dateDemand,
@@ -378,8 +381,9 @@ class Demands extends AbstractController
                     ]);
                 }
                 $batchesDB->create([
-                    'date' => $dateDemand,
-                    'batch' => $part['batches'][0]['batch-name']
+                    'dt' => $dateDemand,
+                    'batch' => $part['batches'][0]['batch-name'],
+                    'mail_type' => $order[0]['mail-type']
                 ]);
             } else {
                 $part = json_decode($mailAPI->query([
@@ -409,8 +413,9 @@ class Demands extends AbstractController
                         ]);
                     }
                     $batchesDB->create([
-                        'date' => $dateDemand,
-                        'batch' => $part['batches'][0]['batch-name']
+                        'dt' => $dateDemand,
+                        'batch' => $part['batches'][0]['batch-name'],
+                        'mail_type' => $order[0]['mail-type']
                     ]);
                 }
             }
