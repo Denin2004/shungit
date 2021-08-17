@@ -13,6 +13,8 @@ use App\Entity\Batches;
 
 class Demands extends AbstractController
 {
+    private $discount = 1;
+
     public function list(MyScladAPI $myScladAPI, $offset)
     {
         $demands = json_decode( //ожидае отгрузки
@@ -317,14 +319,14 @@ class Demands extends AbstractController
                         'description' => $productFolder['description'],
                         'tnved-code' => $productFolder['code'],
                         'trademark' => 'NO TM',
-                        'value' => intval(round($pos['price']*0.2, 0)),
+                        'value' => intval(round($pos['price']*$this->discount, 0)),
                         'weight' => $assortment['weight']*$pos['quantity']*1000
                     ];
                     $goods[] = $assortment['productFolder']['meta']['href'];
                 }
             } else {
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['value'] =
-                    ($order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value']+$pos['price']*0.2*$pos['quantity']) /
+                    ($order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']*$order[0]['customs-declaration']['customs-entries'][$productIndex]['value']+$pos['price']*$this->discount*$pos['quantity']) /
                     ($order[0]['customs-declaration']['customs-entries'][$productIndex]['amount']+$pos['quantity']);
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount'] += $pos['quantity'];
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['weight'] += $assortment['weight']*$pos['quantity']*1000;
