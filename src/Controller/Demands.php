@@ -30,7 +30,7 @@ class Demands extends AbstractController
 
 /*        $demands = json_decode(
             $myScladAPI->query([
-                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=name=RR134066817RU',
+                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=name=05831',
                 'method' => 'GET'
             ]),
             true
@@ -136,12 +136,13 @@ class Demands extends AbstractController
 
     public function createPochtaOrder(Request $request, MyScladAPI $myScladAPI, MailAPI $mailAPI, SiteConfig $config, Batches $batchesDB)
     {
+        $data = json_decode($request->getContent(), true);
         $order = [
             [
                 //'address-from' => $config->get('post-office'),
                 'address-type-to' => 'DEFAULT',
                 'customs-declaration' => [
-                    'currency' => 'USD',
+                    'currency' => $data['currency'],
                     'customs-entries' => [],
                     'entries-type' => 'SALE_OF_GOODS',
                 ],
@@ -155,8 +156,6 @@ class Demands extends AbstractController
                 'transport-type' => 'AVIA'
             ]
         ];
-
-        $data = json_decode($request->getContent(), true);
 
         $order[0]['given-name'] = $data['recipient'];
         $order[0]['recipient-name'] = $data['recipient'];
@@ -337,7 +336,6 @@ class Demands extends AbstractController
             'method' => 'PUT',
             'data' => $order
         ]), true);
-
         if (isset($res['result-ids'])) {
             $pochtaDemand = json_decode($mailAPI->query([
                 'url' => 'https://otpravka-api.pochta.ru/1.0/backlog/'.$res['result-ids'][0],
