@@ -4,7 +4,8 @@ security:
         users_in_memory:  
             memory:
                 users: 
-                    test: {password: '1', roles: ['ROLE_ADMIN']}
+                    spb: {password: 's', roles: ['ROLE_ADMIN']}
+                    ptz: {password: 'p', roles: ['ROLE_ADMIN']}
         
     firewalls:
         dev:

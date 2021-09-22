@@ -4,8 +4,6 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-    mail_token: '%env(resolve:MAIL_TOKEN)%'
-    mail_credentials: '%env(resolve:MAIL_CREDENTIALS)%'
     mysclad_credentials: '%env(resolve:MYSCLAD_CREDENTIALS)%'
 
 services:
@@ -36,7 +34,7 @@ services:
 
     App\Services\SiteConfig:
         class: App\Services\SiteConfig
-        arguments: ['%kernel.project_dir%']
+        arguments: ['%kernel.project_dir%', '@security.token_storage']
         public: true
 
     App\Services\AuthenticationHandler:
@@ -45,7 +43,7 @@ services:
 
     App\Services\MailAPI:
         class: App\Services\MailAPI
-        arguments: ['%mail_token%', '%mail_credentials%']
+        arguments: ['@App\Services\SiteConfig']
         public: true        
         
     App\Services\MyScladAPI:

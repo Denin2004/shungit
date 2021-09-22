@@ -1,15 +1,18 @@
 <?php
 namespace App\Services;
 
+use App\Services\SiteConfig;
+
 class MailAPI
 {
     protected $token;
     protected $credentials;
 
-    public function __construct($token, $credentials)
+    public function __construct(SiteConfig $config)
     {
-        $this->token = $token;
-        $this->credentials = base64_encode($credentials);
+        $mail = $config->get('mail');
+        $this->token = $mail['token'];
+        $this->credentials = base64_encode($mail['credentials']);
     }
 
     public function query($query)
