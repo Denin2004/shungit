@@ -371,7 +371,8 @@ class Demands extends AbstractController
             ]);
             $batches = $batchesDB->find([
                 'dt' => $dateDemand,
-                'mail_type' => $order[0]['mail-type']
+                'mail_type' => $order[0]['mail-type'],
+                'postoffice_code' => $config->get('postoffice-code')
             ]);
             if (count($batches) == 0) {
                 $part = json_decode($mailAPI->query([
@@ -388,7 +389,8 @@ class Demands extends AbstractController
                 $batchesDB->create([
                     'dt' => $dateDemand,
                     'batch' => $part['batches'][0]['batch-name'],
-                    'mail_type' => $order[0]['mail-type']
+                    'mail_type' => $order[0]['mail-type'],
+                    'postoffice_code' => $config->get('postoffice-code')
                 ]);
             } else {
                 $part = json_decode($mailAPI->query([
@@ -420,7 +422,8 @@ class Demands extends AbstractController
                     $batchesDB->create([
                         'dt' => $dateDemand,
                         'batch' => $part['batches'][0]['batch-name'],
-                        'mail_type' => $order[0]['mail-type']
+                        'mail_type' => $order[0]['mail-type'],
+                        'postoffice_code' => $config->get('postoffice-code')
                     ]);
                 }
             }

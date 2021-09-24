@@ -10,7 +10,7 @@ class Batches extends Entity
         return $this->provider->fetchAll(
             'select batches.batch
             from public.batches batches
-            where (batches.dt = :dt)and(mail_type=:mail_type)',
+            where (batches.dt = :dt)and(mail_type=:mail_type)and(postoffice_code=:postoffice_code)',
             $params
         );
     }
@@ -18,7 +18,7 @@ class Batches extends Entity
     public function create($params)
     {
         return $this->provider->fetchAll(
-            'insert into public.batches(dt, batch, mail_type) values(:dt, :batch, :mail_type)',
+            'insert into public.batches(dt, batch, mail_type, postoffice_code) values(:dt, :batch, :mail_type, :postoffice_code)',
             $params
         );
     }
