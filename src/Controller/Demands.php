@@ -18,7 +18,7 @@ class Demands extends AbstractController
     public function list(MyScladAPI $myScladAPI, SiteConfig $config, $offset)
     {
         $mySclad = $config->get('mySclad');
-        $demands = json_decode( //ожидае отгрузки
+/*        $demands = json_decode( //ожидае отгрузки
             $myScladAPI->query([
                 'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&order=created,desc&offset='.$offset.
                   '&filter=state='.urlencode('https://online.moysklad.ru/api/remap/1.2/entity/demand/metadata/states/715fb121-c8c8-11e8-9107-50480022b339').';'.
@@ -27,15 +27,15 @@ class Demands extends AbstractController
                 'method' => 'GET'
             ]),
             true
-        );
+        );*/
 
-/*        $demands = json_decode(
+        $demands = json_decode(
             $myScladAPI->query([
-                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=name=05831',
+                'url' => 'https://online.moysklad.ru/api/remap/1.2/entity/demand?limit=10&offset='.$offset.'&filter=name=07718',
                 'method' => 'GET'
             ]),
             true
-        );*/
+        );
 
 /*        $demands = json_decode(
             $myScladAPI->query([
@@ -279,6 +279,7 @@ class Demands extends AbstractController
                 ]),
                 true
             );// description брать из product folder
+            $quantity = isset($assortment['weighed'])&& $assortment['weighed'] == true ? 1 : $pos['quantity'];
             $productIndex = array_search($assortment['productFolder']['meta']['href'], $goods);
             if ($productIndex === false) {
                 $productFolder = json_decode(
@@ -314,7 +315,7 @@ class Demands extends AbstractController
                         ]);
                     }
                     $order[0]['customs-declaration']['customs-entries'][] = [
-                        'amount' => $pos['quantity'],
+                        'amount' => $quantity,
                         'country-code' => 643,
                         'description' => $productFolder['description'],
                         'tnved-code' => $productFolder['code'],
@@ -332,10 +333,14 @@ class Demands extends AbstractController
                     )
                 );*/
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['value'] += intval(round($pos['price']*$this->discount, 0)*$pos['quantity']);
-                $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount'] += $pos['quantity'];
+                $order[0]['customs-declaration']['customs-entries'][$productIndex]['amount'] += $quantity;
                 $order[0]['customs-declaration']['customs-entries'][$productIndex]['weight'] += $assortment['weight']*$pos['quantity']*1000;
             }
         }
+        return new JsonResponse([
+            'success' => true
+        ]);
+
         $res = json_decode($mailAPI->query([
             'url' => 'https://otpravka-api.pochta.ru/1.0/user/backlog',
             'method' => 'PUT',
